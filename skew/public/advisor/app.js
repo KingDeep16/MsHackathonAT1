@@ -369,7 +369,7 @@ async function openDrawer(ticker) {
         ${holding ? ` · <b style="color:var(--accent)">${money(holding.amount)} in portfolio (${holding.shares} shares)</b>` : ""}</p>
     </div>
     <div style="display:flex;gap:8px;align-items:center">
-      <a class="theme-btn" href="/#${encodeURIComponent(ticker)}" style="display:inline-flex;align-items:center;text-decoration:none;color:var(--accent)">SOP DEEP DIVE →</a>
+      <a class="theme-btn" href="/#${encodeURIComponent(ticker)}" style="display:inline-flex;align-items:center;text-decoration:none;color:var(--accent)">RESEARCH OVERVIEW →</a>
       <button class="close" id="close">×</button>
     </div>`;
   $("close").onclick = closeDrawer;
@@ -445,7 +445,7 @@ async function openDrawer(ticker) {
     </section>
     <section class="card"><h3>Sources</h3>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <a class="src-chip" href="/#${encodeURIComponent(ticker)}" style="border-color:var(--accent);color:var(--accent)">Full 9-step SOP research →</a>
+        <a class="src-chip" href="/#${encodeURIComponent(ticker)}" style="border-color:var(--accent);color:var(--accent)">Full stock research overview →</a>
         <a class="src-chip" href="${esc(secUrl)}" target="_blank" rel="noopener">SEC 10-K filings ↗</a>
         ${d.earnings_release ? `<a class="src-chip" href="${esc(d.earnings_release.url)}" target="_blank" rel="noopener">8-K earnings release (${esc(d.earnings_release.filed)}) ↗</a>` : ""}
         <a class="src-chip" href="${esc(d.sources.price)}" target="_blank" rel="noopener">Nasdaq quote ↗</a>

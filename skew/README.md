@@ -1,8 +1,8 @@
-# Skew — SOP Terminal + $100K Client Advisor
+# Skew — Stock Research Overview + $100K Client Advisor
 
 Microsoft × LSEG Hackathon 2026. Educational project, not financial advice.
 
-- **`/`** — the SOP Due Diligence Terminal (mirrored from Stocks-Research): 9-step research on ~8,600 stocks.
+- **`/`** — the Stock Research Overview (mirrored from Stocks-Research): 9-step research on ~8,600 stocks.
 - **`/advisor/`** — the client recommendation: a long-term asymmetric investor has $100,000. Skew screens the S&P 500 on SEC fundamentals, models 5-year bear/base/bull cases, has GPT read each finalist's earnings release and news (every claim cited), allocates a core-satellite portfolio, and writes a client memo whose numbers are checked against the data.
 
 ## Run locally

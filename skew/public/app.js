@@ -1,5 +1,5 @@
 /**
- * SOP Quantitative Stock Due Diligence & Prime Entry Dashboard
+ * Research Quantitative Stock Due Diligence & Prime Entry Dashboard
  * Core Frontend Application Logic
  */
 
@@ -652,7 +652,7 @@ function setupTabs() {
     document.body.classList.add("tab-sop-active");
   }
 
-  // Restore saved SOP density mode
+  // Restore saved Research density mode
   try {
     const savedDensity = localStorage.getItem("sop_density_mode");
     if (savedDensity) setSopDensity(savedDensity, false);
@@ -663,7 +663,7 @@ function setupTabs() {
 }
 
 // ==========================================================================
-// SOP DENSITY & EXECUTIVE MODE (METHOD 6)
+// RESEARCH DENSITY & EXECUTIVE MODE (METHOD 6)
 // ==========================================================================
 function setSopDensity(density, notify = true) {
   const sopPanel = document.getElementById("tab-sop");
@@ -695,7 +695,7 @@ window.setSopDensity = setSopDensity;
 // ==========================================================================
 const PAGE_NAV_MAP = {
   "tab-sop": {
-    heading: "SOP STEPS",
+    heading: "RESEARCH STEPS",
     icon: "🧭",
     steps: [
       { id: "executiveOperationsPanel", num: "00", label: "Operations" },
@@ -1526,7 +1526,7 @@ async function selectStock(symbol, options = {}) {
   if (options.notify) {
     const st = stockDatabase[symbol] || {};
     const company = st.name || symbol;
-    showToastNotification(`⚡ Analyzed ${symbol} (${company}) • 9-Step SOP Full Matrix & DCF Active!`, "success", 3500);
+    showToastNotification(`⚡ Analyzed ${symbol} (${company}) • 9-Step Research Full Matrix & DCF Active!`, "success", 3500);
   }
 }
 window.selectStock = selectStock;
@@ -1814,7 +1814,7 @@ function synthesizeFallbackStock(u) {
     prime_entry_score: 76,
     prime_entry_reasons: [
       "Price & 20 SMA above rising 200 SMA (Bullish Trend)",
-      "SOP Prime Entry Rule: RSI 30-48 dip in primary uptrend"
+      "Research Prime Entry Rule: RSI 30-48 dip in primary uptrend"
     ],
     support: Number((p * 0.94).toFixed(2)),
     resistance: Number((p * 1.12).toFixed(2)),
@@ -1984,7 +1984,7 @@ function renderHeroRibbon(data) {
   const radarBadge = document.getElementById("primeRadarBadge");
   if (data.prime_entry) {
     radarBadge.className = "prime-radar-badge active-buy";
-    radarBadge.innerHTML = `<span style="font-size:1.1rem;">⚡</span> SOP PRIME ENTRY ACTIVE (BUY DIP)`;
+    radarBadge.innerHTML = `<span style="font-size:1.1rem;">⚡</span> RESEARCH PRIME ENTRY ACTIVE (BUY DIP)`;
   } else if (data.death_cross) {
     radarBadge.className = "prime-radar-badge caution";
     radarBadge.innerHTML = `⚠️ DEATH CROSS / TECHNICAL CAUTION`;
@@ -2706,7 +2706,7 @@ function renderOperationsProfile(data) {
 }
 
 // ==========================================================================
-// 3. 9-STEP SOP GRID
+// 3. 9-STEP RESEARCH GRID
 // ==========================================================================
 function renderSopGrid(data) {
   // Step 1: CEO & Leadership
@@ -3431,7 +3431,7 @@ function renderConvictionRadar() {
           </div>
         </div>
         <button class="conviction-btn-load" onclick="selectStock('${symStr}'); document.querySelector('[data-tab=tab-sop]').click();">
-          ⚡ LOAD FULL SOP ANALYSIS
+          ⚡ LOAD FULL RESEARCH ANALYSIS
         </button>
       </div>
     `;
@@ -3500,7 +3500,7 @@ function renderDcfView(data) {
   
   if (fcf <= 0) {
     document.getElementById("dcfIntrinsicResult").textContent = "Speculative / N/A";
-    document.getElementById("dcfMosResult").textContent = "Negative FCF (DCF Model N/A per SOP Section 6)";
+    document.getElementById("dcfMosResult").textContent = "Negative FCF (DCF Model N/A per Research Section 6)";
     document.getElementById("dcfMosResult").style.color = "var(--accent-red)";
     return;
   }
@@ -4120,9 +4120,9 @@ function enrichCompetitorAnalysis(target, peer) {
       }
     }
 
-    // 5. Tactical / SOP Conviction
+    // 5. Tactical / Research Conviction
     if (targetScore >= peerScore + 10) {
-      whyTarget.push(`Higher SOP quantitative entry score (${targetScore}/100 vs ${peerScore}/100)`);
+      whyTarget.push(`Higher Research quantitative entry score (${targetScore}/100 vs ${peerScore}/100)`);
     } else if (peerScore >= targetScore + 10) {
       wherePeer.push(`Higher tactical dip conviction score (${peerScore}/100 vs ${targetScore}/100)`);
     }
@@ -4247,7 +4247,7 @@ function generateBenchmarkTableHtml(target, competitors) {
                   </span>
                 </td>
                 <td style="text-align:center;">
-                  <button class="btn-sm-analyze" onclick="selectStock('${c.symbol}')" title="Analyze ${c.symbol} in 9-Step SOP Terminal">⚡ ANALYZE</button>
+                  <button class="btn-sm-analyze" onclick="selectStock('${c.symbol}')" title="Analyze ${c.symbol} in 9-Step Stock Research Overview">⚡ ANALYZE</button>
                 </td>
               </tr>
             `;
@@ -5399,7 +5399,7 @@ function exportEventToCalendar(title, dateStr, timeStr, desc) {
     const icsContent = [
       "BEGIN:VCALENDAR",
       "VERSION:2.0",
-      "PRODID:-//SOP Research Terminal//Catalyst Hub//EN",
+      "PRODID:-//Research Research Terminal//Catalyst Hub//EN",
       "CALSCALE:GREGORIAN",
       "METHOD:PUBLISH",
       "BEGIN:VEVENT",
@@ -5525,7 +5525,7 @@ function toggleCatalystAudioBriefing() {
   const nextStock = stockList[0];
 
   let speechText = `Good morning. Here is your institutional catalyst intelligence briefing for ${name}, ticker ${sym}, trading at ${price}. `;
-  speechText += `The systematic SOP quantitative stance is currently ${stance}, supported by a confirmed ${moat}. Intrinsic discounted cash flow value is estimated at ${dcfVal}, providing a ${mos} margin of safety cushion. `;
+  speechText += `The systematic Research quantitative stance is currently ${stance}, supported by a confirmed ${moat}. Intrinsic discounted cash flow value is estimated at ${dcfVal}, providing a ${mos} margin of safety cushion. `;
   
   if (nextMacro) {
     speechText += `On the macroeconomic front, the next major market-wide catalyst is the ${nextMacro.title}, scheduled for ${nextMacro.date}, ${nextMacro.days_text}. `;
@@ -6014,12 +6014,12 @@ function generateWebhookPayload() {
           fields: [
             { name: "Current Price", value: `$${price}`, inline: true },
             { name: "Target Level", value: `$${triggerTargetPrice}`, inline: true },
-            { name: "SOP Stance", value: `${d.stance || 'ACCUMULATE'}`, inline: true },
+            { name: "Research Stance", value: `${d.stance || 'ACCUMULATE'}`, inline: true },
             { name: "Stop Loss Invalidation", value: `$${stopLoss}`, inline: true },
             { name: "DCF Intrinsic Value", value: `$${dcf}`, inline: true },
             { name: "Tranche Sizing", value: "35% Tranche 1 / 35% Tranche 2", inline: true }
           ],
-          footer: { text: "Systematic SOP Portfolio Engine • Automated Execution Hook" },
+          footer: { text: "Systematic Research Portfolio Engine • Automated Execution Hook" },
           timestamp: new Date().toISOString()
         }
       ]
@@ -6054,7 +6054,7 @@ function generateWebhookPayload() {
       stop_loss: Number(stopLoss),
       time: "{{time}}",
       exchange: "{{exchange}}",
-      comment: `SOP Alert: ${sym} executed trigger condition: ${conditionDesc}`
+      comment: `Research Alert: ${sym} executed trigger condition: ${conditionDesc}`
     };
   } else {
     // REST / n8n / Zapier schema
@@ -6854,7 +6854,7 @@ function buildInstitutionalTearSheetHtml(data, isScreen = false) {
           <!-- Top Institutional Banner -->
           <div class="ts-banner">
             <span>Institutional Equity Research Memorandum • Confidential</span>
-            <span>Date: ${dateStr} • Quantitative SOP Engine v4.2</span>
+            <span>Date: ${dateStr} • Quantitative Research Engine v4.2</span>
           </div>
 
           <!-- Title Block -->
@@ -6880,7 +6880,7 @@ function buildInstitutionalTearSheetHtml(data, isScreen = false) {
           <div class="ts-section">
             <div class="ts-sec-title">
               <span>1. Strategic Conviction Thesis &amp; Executive Leadership</span>
-              <span>SOP Phase 1</span>
+              <span>Research Phase 1</span>
             </div>
             <div class="ts-prose" style="margin-bottom:6px;">
               ${rawThesis}
@@ -6895,7 +6895,7 @@ function buildInstitutionalTearSheetHtml(data, isScreen = false) {
           <div class="ts-section">
             <div class="ts-sec-title">
               <span>2. Economic Moat &amp; Addressable TAM Runway</span>
-              <span>SOP Phase 2 &amp; 3</span>
+              <span>Research Phase 2 &amp; 3</span>
             </div>
             <div class="ts-grid-2">
               <div>
@@ -6913,7 +6913,7 @@ function buildInstitutionalTearSheetHtml(data, isScreen = false) {
           <div class="ts-section">
             <div class="ts-sec-title">
               <span>3. Forensic Multiples &amp; Capital Quality Scorecard</span>
-              <span>SOP Phase 5</span>
+              <span>Research Phase 5</span>
             </div>
             <div class="ts-grid-3">
               <!-- Valuation Multiples -->
@@ -6964,7 +6964,7 @@ function buildInstitutionalTearSheetHtml(data, isScreen = false) {
         <!-- Page 1 Footer -->
         <div class="ts-footer">
           <span>CONFIDENTIAL • Page 1 of 2</span>
-          <span>SOP Quantitative Terminal • NYSE + NASDAQ + LSEG Active Coverage</span>
+          <span>Stock Research Overview • NYSE + NASDAQ + LSEG Active Coverage</span>
         </div>
       </div>
 
@@ -6981,7 +6981,7 @@ function buildInstitutionalTearSheetHtml(data, isScreen = false) {
           <div class="ts-section">
             <div class="ts-sec-title">
               <span>4. Triangulated Valuation Matrix (DCF vs. Street Consensus)</span>
-              <span>SOP Phase 6</span>
+              <span>Research Phase 6</span>
             </div>
             <table class="ts-table" style="margin-bottom:6px;">
               <thead>
@@ -7019,7 +7019,7 @@ function buildInstitutionalTearSheetHtml(data, isScreen = false) {
           <div class="ts-section">
             <div class="ts-sec-title">
               <span>5. Tactical Prime Entry &amp; Technical Ladder Architecture</span>
-              <span>SOP Phase 8</span>
+              <span>Research Phase 8</span>
             </div>
             <div class="ts-grid-5" style="margin-bottom:6px;">
               <div class="ts-stat-box" style="border-left:3px solid #ef4444;">
@@ -7052,7 +7052,7 @@ function buildInstitutionalTearSheetHtml(data, isScreen = false) {
           <div class="ts-section">
             <div class="ts-sec-title">
               <span>6. Forward Catalyst Horizon &amp; Event Surveillance</span>
-              <span>SOP Phase 7</span>
+              <span>Research Phase 7</span>
             </div>
             <div class="ts-grid-3">
               <div class="ts-stat-box">
@@ -7077,7 +7077,7 @@ function buildInstitutionalTearSheetHtml(data, isScreen = false) {
           <div class="ts-section">
             <div class="ts-sec-title">
               <span>7. Downside Bear Case &amp; Structural Risk Vectors</span>
-              <span>SOP Phase 4 &amp; 8</span>
+              <span>Research Phase 4 &amp; 8</span>
             </div>
             <div class="ts-grid-2">
               <div>
@@ -7095,7 +7095,7 @@ function buildInstitutionalTearSheetHtml(data, isScreen = false) {
         <!-- Section 8: Compliance & Legal Sign-off Footer -->
         <div class="ts-footer">
           <span>RESEARCH DISCLAIMER: Strictly for institutional analytical purposes. Not investment advice.</span>
-          <span>SOP Quantitative Engine • Security Hash: ${sym}-${Date.now().toString(36).toUpperCase()} • Page 2 of 2</span>
+          <span>Research Quantitative Engine • Security Hash: ${sym}-${Date.now().toString(36).toUpperCase()} • Page 2 of 2</span>
         </div>
       </div>
     </div>
@@ -7211,7 +7211,7 @@ function setupExportButtons() {
 • **Executive Thesis**:
 ${data.sop_thesis || 'Established position with durable moat.'}
 
-*Source: SOP Quantitative Terminal • Full 9-Step Institutional Framework*`;
+*Source: Stock Research Overview • Full 9-Step Institutional Framework*`;
 
       navigator.clipboard.writeText(mdThesis).then(() => {
         const orig = copyBtn.textContent;
@@ -7787,7 +7787,7 @@ function setupCongressExplorer() {
             <span class="delay-pill ${delayClass} clickable-figure" data-info-key="stock_act_lag" title="Disclosure delay: ${delay} days between execution and public disclosure">${delay}d <span class="table-info-glyph">?</span></span>
           </td>
           <td>
-            <button class="btn-sm-analyze" onclick="handleCongressAnalyze('${t.ticker}')" title="Run 9-Step SOP, DCF, and DCA model for ${t.ticker}">⚡ ANALYZE</button>
+            <button class="btn-sm-analyze" onclick="handleCongressAnalyze('${t.ticker}')" title="Run 9-Step Research, DCF, and DCA model for ${t.ticker}">⚡ ANALYZE</button>
           </td>
         </tr>
       `;
@@ -7883,13 +7883,13 @@ const METRIC_DEFINITIONS = {
     getLiveValue: (st) => st.prime_entry ? "BUY DIP (Optimal Accumulation Zone)" : (st.trend_bullish ? "UPTREND MONITOR (Wait for Pullback)" : "CAUTION / STRUCTURAL WATCH")
   },
   sop_score: {
-    title: "SOP Institutional Score",
+    title: "Research Institutional Score",
     category: "COMPOSITE RATING",
-    acronym: "SOP",
+    acronym: "Research",
     icon: "🏆",
     summary: "A 0-to-100 quantitative composite scoring 9 critical institutional pillars: management credibility, moat durability, TAM runway, financial solvency, free cash flow conversion, valuation multiples, technical alignment, smart money flows, and risk-adjusted return.",
-    howToRead: "80-100: Top-decile compounder (Prime Long-Term Buy); 65-79: Strong GARP candidate with moderate valuation; 50-64: Speculative or cyclically challenged; <50: High-risk or overleveraged, fails SOP due diligence.",
-    rule: "Institutional portfolios require an SOP Score >= 75 for full position allocation. Scores below 60 are restricted to speculative pilot tranches (<=1% portfolio weight).",
+    howToRead: "80-100: Top-decile compounder (Prime Long-Term Buy); 65-79: Strong GARP candidate with moderate valuation; 50-64: Speculative or cyclically challenged; <50: High-risk or overleveraged, fails Research due diligence.",
+    rule: "Institutional portfolios require an Research Score >= 75 for full position allocation. Scores below 60 are restricted to speculative pilot tranches (<=1% portfolio weight).",
     benchmark: "Universe Average: ~62/100. Core Watchlist Average: ~84/100.",
     getLiveValue: (st) => {
       const score = st.entry_score ?? st.sop_score ?? 75;
@@ -7931,7 +7931,7 @@ const METRIC_DEFINITIONS = {
     acronym: "RSI",
     icon: "⚡",
     summary: "Measures the speed and change of price movements on an oscillator scale from 0 to 100, invented by J. Welles Wilder.",
-    howToRead: "RSI < 30: Oversold (extreme pessimism, potential mean-reversion bounce); RSI 35-48: SOP Dip Buy Sweet Spot (healthy pullback in an uptrend); RSI 50-65: Bullish momentum; RSI > 70: Overbought (extended, vulnerable to sharp profit-taking).",
+    howToRead: "RSI < 30: Oversold (extreme pessimism, potential mean-reversion bounce); RSI 35-48: Research Dip Buy Sweet Spot (healthy pullback in an uptrend); RSI 50-65: Bullish momentum; RSI > 70: Overbought (extended, vulnerable to sharp profit-taking).",
     rule: "DO NOT buy breakout FOMO when RSI is > 75. Wait for the RSI to cool down into the 38-48 range before adding Tranche 2.",
     benchmark: "Prime Accumulation: 35 to 48 in an uptrending stock.",
     getLiveValue: (st) => (st.rsi !== undefined && st.rsi !== null) ? `${st.rsi} (${st.rsi_status || (st.rsi < 35 ? 'Oversold Dip' : st.rsi > 70 ? 'Overbought' : 'Neutral Pullback')})` : "RSI Neutral"
@@ -7961,7 +7961,7 @@ const METRIC_DEFINITIONS = {
     summary: "Calculates the P/E ratio divided by the annualized earnings per share (EPS) growth rate. Standardized by legendary Fidelity fund manager Peter Lynch to identify growth at a reasonable price.",
     howToRead: "PEG < 1.0: Deep Value / Undervalued growth (paying less than 1x for each unit of growth); PEG 1.0 - 1.5: Fair Value (healthy growth trade); PEG 1.5 - 2.5: Premium valuation (common in wide-moat tech monopolies); PEG > 2.5: Speculative / Overvalued (vulnerable to severe compression on growth deceleration).",
     rule: "Peter Lynch GARP Rule: A company with a 30x P/E growing earnings at 40% (PEG = 0.75) is quantitatively cheaper than a 15x P/E company growing at only 5% (PEG = 3.0).",
-    benchmark: "SOP Threshold: PEG <= 1.5 for core accumulation.",
+    benchmark: "Research Threshold: PEG <= 1.5 for core accumulation.",
     getLiveValue: (st) => {
       if (st.peg_ratio !== null && st.peg_ratio !== undefined && st.peg_ratio > 0) {
         const p = Number(st.peg_ratio);
@@ -8064,7 +8064,7 @@ const METRIC_DEFINITIONS = {
     summary: "Total debt liabilities divided by total shareholder equity. Evaluates how aggressively a company is financing its growth through leverage versus shareholder capital.",
     howToRead: "D/E < 0.5x: Pristine fortress balance sheet (minimal leverage, immune to interest rate spikes); D/E 0.5x - 1.5x: Moderate healthy leverage for capital-intensive companies; D/E > 2.0x: High leverage risk; D/E > 3.0x: Warning territory.",
     rule: "In macro regimes with higher interest rates, prioritize companies with D/E < 0.8x and high Net Cash positions (Cash > Total Debt). They are positioned to acquire distressed competitors rather than dilute shareholders.",
-    benchmark: "SOP Threshold: D/E < 1.0x or Interest Coverage > 8x.",
+    benchmark: "Research Threshold: D/E < 1.0x or Interest Coverage > 8x.",
     getLiveValue: (st) => {
       if (st.debt_to_equity !== null && st.debt_to_equity !== undefined) {
         const de = Number(st.debt_to_equity);
@@ -8098,7 +8098,7 @@ const METRIC_DEFINITIONS = {
     summary: "Net income divided by average shareholder equity. Measures how effectively management turns equity capital into net profits.",
     howToRead: "ROE > 20%: Elite management capital efficiency; 12% - 20%: Solid; < 10%: Mediocre capital allocation. Note: Always check D/E to ensure high ROE is not artificially created through extreme debt leverage.",
     rule: "Charlie Munger's Golden Rule: Over the long term, it is hard for a stock to earn a much better return than the business which underlies it earns. If the business earns 20% on equity, the stock will track that compound rate.",
-    benchmark: "SOP Threshold: ROE > 15% with D/E < 1.5x.",
+    benchmark: "Research Threshold: ROE > 15% with D/E < 1.5x.",
     getLiveValue: (st) => (st.roe !== null && st.roe !== undefined) ? `${Number(st.roe).toFixed(1)}% Return on Equity` : "ROE Unspecified"
   },
   net_margin: {
@@ -8120,7 +8120,7 @@ const METRIC_DEFINITIONS = {
     summary: "The percentage of outstanding common shares held by executive officers, directors, and founder-CEOs.",
     howToRead: "> 10%: Founder-led powerhouse with massive alignment; 3% - 10%: Substantial skin in the game; 1% - 3%: Standard institutional corporate; < 0.2%: Management are hired hands with minimal direct financial exposure to stock downside.",
     rule: "We favor companies where the CEO's personal net worth is tied directly to the common stock. Look out for unexpected insider selling outside of pre-scheduled Rule 10b5-1 plans.",
-    benchmark: "SOP Target: >= 2.0% insider ownership or >$50M personal stake.",
+    benchmark: "Research Target: >= 2.0% insider ownership or >$50M personal stake.",
     getLiveValue: (st) => {
       const ins = st.insider_pct ?? st.insider_ownership;
       return (ins !== null && ins !== undefined) ? `${Number(ins).toFixed(1)}% Insider Ownership` : "Institutional Free Float";
@@ -8213,8 +8213,8 @@ const METRIC_DEFINITIONS = {
     icon: "⚖️",
     summary: "Compares the potential dollar upside from the entry price to the consensus target against the potential dollar loss if the stop loss is triggered.",
     howToRead: "R:R = (Target Price - Entry Price) / (Entry Price - Stop Loss Price). A ratio of 1:3 means you stand to gain $3 of profit for every $1 of capital risked.",
-    rule: "The SOP Golden Rule of Asymmetry: NEVER execute a trade with an R:R below 1:2.5. By maintaining an average R:R > 1:3.0, you remain highly profitable even with a 45% win rate.",
-    benchmark: "Prime SOP Setup: R:R >= 1:3.0.",
+    rule: "The Research Golden Rule of Asymmetry: NEVER execute a trade with an R:R below 1:2.5. By maintaining an average R:R > 1:3.0, you remain highly profitable even with a 45% win rate.",
+    benchmark: "Prime Research Setup: R:R >= 1:3.0.",
     getLiveValue: (st) => {
       const p = Number(st.price || 0);
       const tgt = Number(st.target_mean || (p * 1.25));
@@ -8223,9 +8223,9 @@ const METRIC_DEFINITIONS = {
         const reward = tgt - p;
         const risk = p - stop;
         const ratio = risk > 0 ? (reward / risk).toFixed(2) : "3.00";
-        return `1 : ${ratio} (Asymmetric SOP Setup)`;
+        return `1 : ${ratio} (Asymmetric Research Setup)`;
       }
-      return "1 : 3.00 (Minimum SOP Asymmetry Threshold)";
+      return "1 : 3.00 (Minimum Research Asymmetry Threshold)";
     }
   },
   stop_loss: {
@@ -8236,7 +8236,7 @@ const METRIC_DEFINITIONS = {
     summary: "The predetermined price level where a thesis is deemed invalidated and the position is automatically closed to prevent catastrophic capital loss.",
     howToRead: "Placed strategically 1-2% below major structural support (such as the 200-day SMA, swing low pivot, or lower Bollinger Band) so routine market noise does not trigger a premature exit.",
     rule: "Rule 1 of professional trading: Decide your exit before you enter. If you cannot accept the dollar loss at the stop level, reduce your position size until you can.",
-    benchmark: "Standard SOP Risk: Stop loss 6% - 10% below entry.",
+    benchmark: "Standard Research Risk: Stop loss 6% - 10% below entry.",
     getLiveValue: (st) => {
       const p = Number(st.price || 0);
       const stop = Number(st.stop_loss || (p * 0.90));
@@ -8268,7 +8268,7 @@ const METRIC_DEFINITIONS = {
     acronym: "TICKER",
     icon: "🏷️",
     summary: "The unique 1-to-5 character identifier assigned to a publicly traded corporation on major U.S. stock exchanges (NYSE or NASDAQ).",
-    howToRead: "Click any ticker symbol across the table to instantly load its complete 9-step SOP institutional due diligence card, DCF valuation model, and 3-tier DCA accumulation ladder.",
+    howToRead: "Click any ticker symbol across the table to instantly load its complete 9-step Research institutional due diligence card, DCF valuation model, and 3-tier DCA accumulation ladder.",
     rule: "Cross-reference ticker-specific Capitol Hill buying volume against institutional hedge fund accumulation and Step 2 Economic Moat ratings.",
     benchmark: "Terminal Universe: 7,300+ stocks across NYSE, NASDAQ, and LSEG (London Stock Exchange).",
     getLiveValue: (st) => `${st.symbol || currentSymbol} • ${st.name || "Global Equities"}`
@@ -8358,11 +8358,11 @@ const METRIC_DEFINITIONS = {
     category: "WORKFLOW AUTOMATION",
     acronym: "ANALYZE",
     icon: "⚡",
-    summary: "Instantly routes the selected stock through the entire 9-step SOP quantitative due diligence engine, computes DCF intrinsic valuation, plots the 3-tier DCA accumulation ladder, and loads SEC Form 4 insider filings.",
+    summary: "Instantly routes the selected stock through the entire 9-step Research quantitative due diligence engine, computes DCF intrinsic valuation, plots the 3-tier DCA accumulation ladder, and loads SEC Form 4 insider filings.",
     howToRead: "Clicking ⚡ ANALYZE immediately switches the terminal view, updates all KPIs, synchronizes the URL hash, and highlights the company profile.",
     rule: "Never trade a political headline blindly. Always click ⚡ ANALYZE to verify Step 5 Solvency (Debt/Equity < 1.0) and Step 2 Economic Moat before risking capital.",
     benchmark: "Comprehensive 9-Step Verification in < 150ms.",
-    getLiveValue: (st) => `Instant 9-Pillar SOP Verification for ${st.symbol || currentSymbol}`
+    getLiveValue: (st) => `Instant 9-Pillar Research Verification for ${st.symbol || currentSymbol}`
   },
   current_price: {
     title: "Real-Time / Closing Share Price",
@@ -8371,7 +8371,7 @@ const METRIC_DEFINITIONS = {
     icon: "💵",
     summary: "The latest traded market price per share on the primary exchange (NYSE/NASDAQ).",
     howToRead: "Compare against the 20-day SMA (mean reversion) and 200-day SMA (macro regime). Cross-reference with the 3 DCA Ladder price levels to know your exact entry targets.",
-    rule: "Price is what you pay; value is what you get. Never evaluate a stock's cheapness by its nominal dollar price—evaluate it by its SOP Score, PEG ratio, and DCF intrinsic fair value.",
+    rule: "Price is what you pay; value is what you get. Never evaluate a stock's cheapness by its nominal dollar price—evaluate it by its Research Score, PEG ratio, and DCF intrinsic fair value.",
     benchmark: "Primary Market Execution Quote.",
     getLiveValue: (st) => `$${Number(st.price || 0).toFixed(2)} USD`
   },
@@ -8399,8 +8399,8 @@ const METRIC_DEFINITIONS = {
     icon: "📏",
     summary: "The absolute lowest and highest price at which the stock has traded over the trailing 52-week (1-year) period.",
     howToRead: "The visual gauge displays where the current price sits within this annual channel. Near 0% = 52-week low (deep value or fundamental breakdown); Near 100% = 52-week high (breakout momentum or valuation extension).",
-    rule: "The sweet spot for SOP Prime Entry is when a stock pulls back 10-18% from its 52-week high to test rising moving average support.",
-    benchmark: "SOP Target: 65% - 85% of 52W range in healthy compounders.",
+    rule: "The sweet spot for Research Prime Entry is when a stock pulls back 10-18% from its 52-week high to test rising moving average support.",
+    benchmark: "Research Target: 65% - 85% of 52W range in healthy compounders.",
     getLiveValue: (st) => {
       const low = Number(st.fifty_two_week_low || (st.price ? st.price * 0.7 : 0)).toFixed(2);
       const high = Number(st.fifty_two_week_high || (st.price ? st.price * 1.3 : 0)).toFixed(2);
@@ -8446,7 +8446,7 @@ const METRIC_DEFINITIONS = {
     summary: "Market capitalization divided by total trailing 12-month revenue. Evaluates valuation independent of accounting profits or non-cash charges.",
     howToRead: "P/S < 2.0x: Low valuation / value multiple; 2.0x - 8.0x: Standard growth; > 15.0x: High premium (justified only by gross margin >70% and growth >30%).",
     rule: "Never buy a P/S > 20x stock unless it possesses a wide economic moat and 40%+ revenue growth, as high P/S multiples compress violently during rate hikes.",
-    benchmark: "SOP Target: P/S aligned with peer margins.",
+    benchmark: "Research Target: P/S aligned with peer margins.",
     getLiveValue: (st) => (st.ps_ratio !== null && st.ps_ratio !== undefined) ? `${Number(st.ps_ratio).toFixed(1)}x Price-to-Sales` : "P/S Ratio Tracked"
   },
   roic: {
@@ -8457,7 +8457,7 @@ const METRIC_DEFINITIONS = {
     summary: "Net Operating Profit After Tax (NOPAT) divided by Total Invested Capital (Debt + Equity - Excess Cash). The single best measure of corporate moat and management skill.",
     howToRead: "ROIC > 20%: Elite wide moat compounder (e.g. NVDA, AAPL, MSFT); 12% - 20%: Strong; < 8%: Company fails to cover its cost of capital (value destroyer).",
     rule: "Warren Buffett & Charlie Munger Rule: A company that generates 25% ROIC and reinvests 80% of its cash flow will compound wealth far faster than an optical low P/E company earning 6% ROIC.",
-    benchmark: "SOP Hurdle: ROIC >= 15% sustained over 3-5 years.",
+    benchmark: "Research Hurdle: ROIC >= 15% sustained over 3-5 years.",
     getLiveValue: (st) => {
       if (st.roic !== null && st.roic !== undefined) {
         const r = Number(st.roic);
@@ -8474,7 +8474,7 @@ const METRIC_DEFINITIONS = {
     summary: "The annualized compound growth rate of top-line revenue over 3 years, paired with year-over-year quarterly revenue expansion.",
     howToRead: "> 25%: Hyper-growth category leader; 12% - 25%: Strong sustained compounder; 5% - 12%: Mature GDP-growth business; Negative: Secular decline.",
     rule: "Revenue is the fuel of future earnings. We require organic revenue growth driven by volume expansion and pricing power, not purely debt-funded acquisitions.",
-    benchmark: "SOP Target: Minimum 10% - 15% revenue CAGR for GARP candidates.",
+    benchmark: "Research Target: Minimum 10% - 15% revenue CAGR for GARP candidates.",
     getLiveValue: (st) => (st.revenue_growth !== null && st.revenue_growth !== undefined) ? `${Number(st.revenue_growth).toFixed(1)}% YoY Revenue Growth` : "Top-Line Revenue Tracked"
   },
   gross_margin: {
@@ -8485,7 +8485,7 @@ const METRIC_DEFINITIONS = {
     summary: "(Total Revenue - Cost of Goods Sold) divided by Total Revenue. Measures the fundamental profitability of a company's products before overhead expenses.",
     howToRead: "> 70%: Exceptional software/semiconductor monopoly; 50% - 70%: Strong value-add; 20% - 50%: Capital-intensive manufacturing; < 20%: Thin margin commodity.",
     rule: "High gross margins provide the ultimate buffer against supply chain shocks and wage inflation.",
-    benchmark: "SOP Target: Gross Margin >= 45%.",
+    benchmark: "Research Target: Gross Margin >= 45%.",
     getLiveValue: (st) => (st.gross_margin !== null && st.gross_margin !== undefined) ? `${Number(st.gross_margin).toFixed(1)}% Gross Margin` : "Gross Margin Tracked"
   },
   operating_margin: {
@@ -8496,7 +8496,7 @@ const METRIC_DEFINITIONS = {
     summary: "Operating Income (EBIT) divided by Total Revenue. Measures operational efficiency and leverage after paying R&D, sales, and administrative costs.",
     howToRead: "> 35%: Monopolistic operating efficiency; 20% - 35%: High performance; 10% - 20%: Standard; < 5%: Fragile business model.",
     rule: "Look for operating margin expansion where revenue grows faster than operating expenses ('Operating Leverage').",
-    benchmark: "SOP Target: Operating Margin >= 20%.",
+    benchmark: "Research Target: Operating Margin >= 20%.",
     getLiveValue: (st) => (st.operating_margin !== null && st.operating_margin !== undefined) ? `${Number(st.operating_margin).toFixed(1)}% Operating Margin` : "Operating Margin Tracked"
   },
   interest_coverage: {
@@ -8507,7 +8507,7 @@ const METRIC_DEFINITIONS = {
     summary: "Operating Profit (EBIT) divided by annual interest expense on debt. Measures how easily a company can pay interest on outstanding debt obligations.",
     howToRead: "> 10x: Bulletproof debt servicing capacity; 4x - 10x: Healthy; < 2.5x: High financial distress risk if earnings fluctuate; < 1.0x: Default/bankruptcy danger.",
     rule: "Never invest heavily in companies with interest coverage < 3.0x during an era of higher interest rates.",
-    benchmark: "SOP Hurdle: Interest Coverage >= 5.0x.",
+    benchmark: "Research Hurdle: Interest Coverage >= 5.0x.",
     getLiveValue: (st) => (st.interest_coverage !== null && st.interest_coverage !== undefined) ? `${Number(st.interest_coverage).toFixed(1)}x Interest Coverage` : "Fortress Balance Sheet (Net Cash / Low Debt Burden)"
   },
   current_ratio: {
@@ -8518,7 +8518,7 @@ const METRIC_DEFINITIONS = {
     summary: "Total Current Assets divided by Total Current Liabilities. Evaluates short-term liquidity over the next 12 months.",
     howToRead: "> 1.5x: Strong short-term cushion; 1.0x - 1.5x: Standard; < 1.0x: Negative working capital (relies on continuous cash flow or credit lines).",
     rule: "Look for current assets composed primarily of cash, short-term Treasuries, and accounts receivable rather than illiquid inventory.",
-    benchmark: "SOP Target: Current Ratio >= 1.25x.",
+    benchmark: "Research Target: Current Ratio >= 1.25x.",
     getLiveValue: (st) => (st.current_ratio !== null && st.current_ratio !== undefined) ? `${Number(st.current_ratio).toFixed(2)}x Current Ratio` : "Working Capital Adequate"
   },
   take_profit: {
@@ -8545,7 +8545,7 @@ const METRIC_DEFINITIONS = {
     summary: "The discount between the market price and the intrinsic fair value computed by the Discounted Cash Flow (DCF) model.",
     howToRead: "Positive (+20% to +40%): High margin of safety (trading below intrinsic value); 0% to +10%: Fairly valued; Negative (-15%): Trading at a premium.",
     rule: "The Margin of Safety protects your principal against forecasting errors, economic recessions, or bad luck. As Benjamin Graham wrote, 'The function of the margin of safety is, in essence, that of rendering unnecessary an accurate estimate of the future.'",
-    benchmark: "SOP Threshold: Margin of Safety >= +15% for primary accumulation.",
+    benchmark: "Research Threshold: Margin of Safety >= +15% for primary accumulation.",
     getLiveValue: (st) => {
       const mos = st.margin_of_safety ?? st.dcf_margin_safety;
       if (mos !== null && mos !== undefined) {
@@ -8596,7 +8596,7 @@ const METRIC_DEFINITIONS = {
     summary: "Comprehensive evaluation of liquid cash reserves, short-term liabilities, and total long-term debt to guarantee operational survival through market recessions.",
     howToRead: "Fortress = Net cash position with interest coverage > 15x; Stable = Manageable debt with D/E < 1.0x; Distressed = Heavy debt service load.",
     rule: "Companies with fortress balance sheets do not merely survive recessions—they acquire distressed competitors at bargain discounts.",
-    benchmark: "SOP Standard: D/E < 1.0x and Interest Coverage > 5.0x.",
+    benchmark: "Research Standard: D/E < 1.0x and Interest Coverage > 5.0x.",
     getLiveValue: (st) => {
       if (st.debt_to_equity !== null && st.debt_to_equity !== undefined) {
         return Number(st.debt_to_equity) < 0.8 ? `Fortress Solvency (D/E: ${Number(st.debt_to_equity).toFixed(2)}x)` : `Manageable Solvency (D/E: ${Number(st.debt_to_equity).toFixed(2)}x)`;
@@ -8665,7 +8665,7 @@ const METRIC_DEFINITIONS = {
   }
 };
 
-// Add generic SOP Step definitions 1-9
+// Add generic Research Step definitions 1-9
 for (let i = 1; i <= 9; i++) {
   const stepKey = `sop_step_${i}`;
   const stepTitles = [
@@ -8682,15 +8682,15 @@ for (let i = 1; i <= 9; i++) {
   ];
   if (!METRIC_DEFINITIONS[stepKey]) {
     METRIC_DEFINITIONS[stepKey] = {
-      title: `SOP Step 0${i}: ${stepTitles[i]}`,
-      category: "9-STEP SOP MATRIX",
+      title: `Research Step 0${i}: ${stepTitles[i]}`,
+      category: "9-STEP RESEARCH MATRIX",
       acronym: `STEP 0${i}`,
       icon: "📋",
       summary: `Pillar ${i} of our 9-step quantitative due diligence framework. Evaluates ${stepTitles[i].toLowerCase()} to ensure institutional investment standards.`,
       howToRead: "Pass = Criteria met with verified numbers; Watch = Borderline valuation or debt; Fail = High risk of capital impairment.",
       rule: "All 9 steps must be evaluated prior to initiating Tranche 1. A critical failure on Step 5 (Solvency) or Step 2 (Moat) disqualifies the stock regardless of momentum.",
-      benchmark: "Minimum 7 of 9 SOP Steps must achieve green status.",
-      getLiveValue: (st) => `SOP Step ${i} Verified for ${st.symbol || currentSymbol}`
+      benchmark: "Minimum 7 of 9 Research Steps must achieve green status.",
+      getLiveValue: (st) => `Research Step ${i} Verified for ${st.symbol || currentSymbol}`
     };
   }
 }
@@ -8752,7 +8752,7 @@ function openMetricModal(key) {
     acronym: key.toUpperCase(),
     icon: "💡",
     summary: "Detailed financial metric tracked across the terminal.",
-    howToRead: "Cross-reference with SOP benchmarks and peer multiples.",
+    howToRead: "Cross-reference with Research benchmarks and peer multiples.",
     rule: "Maintain disciplined risk-reward asymmetry.",
     benchmark: "Standard industry baseline."
   };
@@ -8828,10 +8828,10 @@ const METRIC_JUMP_TARGETS = [
   { keyword: "INSIDER", label: "SEC Form 4 Corporate Insiders", desc: "CEO & Director Open Market Purchases", tab: "tab-congress", elId: "congressForm4TableBody", infoKey: "form_4_insider" },
   { keyword: "ALPHA", label: "Excess Alpha Return vs SPY", desc: "Performance Alpha Above S&P 500", tab: "tab-congress", elId: "cStockSentiment", infoKey: "excess_alpha" },
   { keyword: "52W RANGE", label: "52-Week Range High / Low", desc: "Annual Price Channel & Positioning", tab: "tab-sop", elId: "ribbon52WFill", infoKey: "range_52w" },
-  { keyword: "SOP SCORE", label: "SOP Quantitative Score (0-100)", desc: "9-Pillar Composite Rating", tab: "tab-sop", elId: "kpi1Score", infoKey: "sop_score" },
+  { keyword: "RESEARCH SCORE", label: "Research Quantitative Score (0-100)", desc: "9-Pillar Composite Rating", tab: "tab-sop", elId: "kpi1Score", infoKey: "sop_score" },
   { keyword: "UNIVERSE", label: "8,500+ Stock Global Screener", desc: "NYSE + NASDAQ + LSEG Universe", tab: "tab-universe", elId: "universeSearchInput", infoKey: "sop_score" },
-  { keyword: "CONVICTION", label: "What to Buy Now Conviction Radar", desc: "Highest SOP Score Ranked Plays", tab: "tab-buy-now", elId: "tab-buy-now", infoKey: "prime_entry" },
-  { keyword: "THESIS", label: "SOP Thesis Exporter", desc: "Institutional PDF & Markdown Report", tab: "tab-thesis", elId: "tab-thesis", infoKey: "sop_score" },
+  { keyword: "CONVICTION", label: "What to Buy Now Conviction Radar", desc: "Highest Research Score Ranked Plays", tab: "tab-buy-now", elId: "tab-buy-now", infoKey: "prime_entry" },
+  { keyword: "THESIS", label: "Research Thesis Exporter", desc: "Institutional PDF & Markdown Report", tab: "tab-thesis", elId: "tab-thesis", infoKey: "sop_score" },
   { keyword: "REVENUE", label: "Revenue Growth & 3-Year CAGR", desc: "Top-Line Expansion Runway", tab: "tab-sop", elId: "sopCardStep3", infoKey: "revenue_growth" },
   { keyword: "MARGIN", label: "Gross & Net Margins", desc: "Pricing Power & Operating Leverage", tab: "tab-sop", elId: "sopCardStep2", infoKey: "gross_margin" },
   { keyword: "CASH", label: "Cash Reserves & Current Ratio", desc: "Short-Term Working Capital", tab: "tab-sop", elId: "kpiCard4", infoKey: "current_ratio" },
