@@ -8,7 +8,7 @@ from openai import AzureOpenAI
 endpoint = "https://app-uoaihack2ix6ak.azurewebsites.net"
 model_name = "gpt-6-astra"
 
-api_key = os.environ["OPENAI_API_KEY"]
+api_key = os.environ["tSXUUlWzUsofEZ8sXFMEp3F80FbnyMUAE9rpAM0dmAa4pEqn"]
 api_version = "2024-12-01-preview"
 
 output_dir = Path("build")
