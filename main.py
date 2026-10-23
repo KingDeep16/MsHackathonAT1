@@ -1,10 +1,17 @@
+import os
+import re
+import sys
+from pathlib import Path
+
 from openai import AzureOpenAI
 
 endpoint = "https://app-uoaihack2ix6ak.azurewebsites.net"
-model_name = "gpt-6.1-sol"
+model_name = "gpt-6-astra"
 
-api_key = "<your api key>"
+api_key = os.environ["OPENAI_API_KEY"]
 api_version = "2024-12-01-preview"
+
+output_dir = Path("build")
 
 client = AzureOpenAI(
     api_version=api_version,
@@ -12,27 +19,45 @@ client = AzureOpenAI(
     api_key=api_key,
 )
 
+system_prompt = (Path(__file__).parent / "system_prompt.md").read_text()
+
+# Usage: python main.py "describe what you want built"
+task = " ".join(sys.argv[1:]) or input("What should Astra build? ")
+
 response = client.chat.completions.create(
     messages=[
         {
             "role": "system",
-            "content": "You are a helpful assistant.",
+            "content": system_prompt,
         },
         {
             "role": "user",
-            "content": "I am going to Paris, what should I see?",
+            "content": task,
         },
-        {
-            "role": "assistant",
-            "content": "Paris, the capital of France, is known for its stunning architecture, art museums, historical landmarks, and romantic atmosphere. Here are some of the top attractions to see in Paris:\n\n1. The Eiffel Tower: The iconic Eiffel Tower is one of the most recognizable landmarks in the world and offers breathtaking views of the city.\n2. The Louvre Museum: The Louvre is one of the worlds largest and most famous museums, housing an impressive collection of art and artifacts, including the Mona Lisa.\n3. Notre-Dame Cathedral: This beautiful cathedral is one of the most famous landmarks in Paris and is known for its Gothic architecture and stunning stained glass windows.\n\nThese are just a few of the many attractions that Paris has to offer. With so much to see and do, its no wonder that Paris is one of the most popular tourist destinations in the world.",
-        },
-        {
-            "role": "user",
-            "content": "What is so great about #1?",
-        }
     ],
-    max_completion_tokens=16384,
-    model=model_name
+    max_completion_tokens=32768,
+    model=model_name,
+    stream=True,
 )
 
-print(response.choices[0].message.content)
+# Stream the response to the terminal as it is written
+content = ""
+for chunk in response:
+    if chunk.choices and chunk.choices[0].delta.content:
+        content += chunk.choices[0].delta.content
+        print(chunk.choices[0].delta.content, end="", flush=True)
+print("\n")
+
+files = re.findall(r'<file path="([^"]+)">\n?(.*?)</file>', content, flags=re.DOTALL)
+for path, body in files:
+    target = (output_dir / path).resolve()
+    # Refuse paths that would escape the output directory
+    if not target.is_relative_to(output_dir.resolve()):
+        print(f"skipped unsafe path: {path}")
+        continue
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(body)
+    print(f"wrote {output_dir / path}")
+
+if not files:
+    print("No files found in the response.")

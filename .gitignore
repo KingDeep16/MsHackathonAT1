@@ -190,3 +190,5 @@ pyrightconfig.json
 .ionide
 
 .venv
+# The Skew app is generated into build/ by main.py, so keep it tracked
+!build/
