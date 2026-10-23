@@ -1,3 +1,14 @@
+# Skew — Microsoft × LSEG Hackathon 2026
+
+**Live app: https://mshackathon.vercel.app**
+
+- [SOP Terminal](https://mshackathon.vercel.app/) — 9-step due diligence on ~8,600 stocks
+- [Client $100K Recommendation](https://mshackathon.vercel.app/advisor/) — screens the S&P 500, has GPT analyse each finalist's earnings release and news with citations, and builds a core-satellite portfolio with a verified client memo
+
+Code, setup and deployment: [skew/](skew/README.md). Educational project, not financial advice.
+
+---
+
 # Example Project
 
 Minimal Python samples that call the OpenAI Portal using the `openai` SDK:
