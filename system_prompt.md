@@ -37,3 +37,23 @@ Rules for files:
 - Include the dependency manifest for the stack (e.g. `requirements.txt`, `package.json`) whenever there are dependencies.
 
 After the last file, finish with one line starting with `RUN:` giving the command to run the project from its root, e.g. `RUN: python app.py`.
+
+
+
+UI Prompt
+I am working on a feature-rich, institutional-grade financial stock research web application (currently deployed at https://mshackathon.vercel.app/#NVDA/sop). 
+
+### Project Overview:
+- **What it is:** A quantitative due diligence terminal monitoring 8,500+ global stocks with 40+ formulas, DCF valuation models, DCA capital allocators, insider tracking, and a 12-step research workflow.
+- **Current State:** It is fully functional with rich data and financial calculations, but the UI currently feels like a high-energy hackathon project with flashing zero values, heavy emojis, and neon/glowing accents.
+
+### Design Goal:
+I want to completely overhaul the UI/UX to make it look like a multi-million-dollar, ultra-sleek, high-class institutional terminal inspired by **Apple** and **Dieter Rams** ("Less, but better" / *Weniger, aber besser*). 
+
+### Key Design Pillars to Implement:
+1. **Palette & Surfaces:** Strip away harsh neon greens and bright fills. Use deep matte obsidian backgrounds (`#0a0a0c`), subtle frosted glass surfaces with razor-thin alpha borders (`rgba(255, 255, 255, 0.07)`), and restrained Apple-style accents (e.g., `#34C759` for positive values/buys).
+2. **Tabular Typography & Precision:** Ensure all financial numbers (prices, P/E ratios, DCF targets) use tabular figures (`font-variant-numeric: tabular-nums`) so columns align perfectly. Establish strict typographic hierarchy with tiny uppercase tracking labels paired with bold, clean metric values.
+3. **Unobtrusive Simplicity:** Remove distracting emoji icons (`⚡`, `🎯`, `🏰`) from headers and card titles. Let the data structure, typography, and spacing speak for themselves.
+4. **Tactile Feedback & Loading States:** Replace raw `$0.00` loading flashes with smooth skeleton loaders. Add subtle spring-like hover states, clean card borders, and smooth transitions.
+
+Please review this direction and provide actionable UI fixes, Tailwind CSS component examples, and layout guidelines to achieve this elite Apple/Dieter Rams aesthetic for our financial terminal.
