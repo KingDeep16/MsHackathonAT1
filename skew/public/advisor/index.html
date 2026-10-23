@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Skew Portfolio Advisor</title>
+  <meta name="description" content="Recommends how to invest $100,000 for a long-term asymmetric investor, using SEC filings, market data and GPT. Educational project, not financial advice.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script>
+    try { const t = localStorage.getItem("skew:theme"); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+  </script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 12 L6 8 L9 10 L14 3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div>SKEW <small>Asymmetric Portfolio Advisor</small></div>
+    </div>
+    <a class="theme-btn" href="/" style="display:inline-flex;align-items:center;text-decoration:none;color:var(--ink)">← SOP TERMINAL</a>
+    <div class="spacer"></div>
+    <span class="pill" id="data-pill"><span class="status-dot"></span><span>Loading data…</span></span>
+    <span class="pill" id="model-pill">AI: checking…</span>
+    <button class="theme-btn" id="theme-btn" title="Toggle light/dark">◐ THEME</button>
+  </header>
+
+  <div class="layout">
+    <!-- ================= Client profile ================= -->
+    <aside class="sidebar">
+      <div class="card accent-top">
+        <div class="eyebrow">01 · The client</div>
+        <h2 style="margin-top:6px">Client profile</h2>
+        <div class="persona">
+          <b>Long-term asymmetric investor.</b> Wants businesses with strong fundamentals where realistic upside far outweighs downside, held 5+ years. Keeps an index-fund core for diversification and concentrates the rest in high-conviction stocks.
+        </div>
+
+        <div class="field">
+          <label for="amount">Amount to invest</label>
+          <input id="amount" type="number" min="1000" step="1000" value="100000">
+        </div>
+        <div class="field">
+          <label for="core">Index-fund core <output id="core-out" class="num">30%</output></label>
+          <input id="core" type="range" min="0" max="80" step="5" value="30">
+        </div>
+        <div class="row-2">
+          <div class="field">
+            <label for="etf">Core ETF</label>
+            <select id="etf"></select>
+          </div>
+          <div class="field">
+            <label for="num">Stocks</label>
+            <input id="num" type="number" min="3" max="15" value="8">
+          </div>
+        </div>
+        <div class="field">
+          <label for="maxstock">Max per stock <output id="maxstock-out" class="num">12%</output></label>
+          <input id="maxstock" type="range" min="5" max="25" step="1" value="12">
+        </div>
+        <div class="field">
+          <label for="maxsector">Max per sector <output id="maxsector-out" class="num">35%</output></label>
+          <input id="maxsector" type="range" min="15" max="60" step="5" value="35">
+        </div>
+        <div class="field">
+          <label for="minasym">Min asymmetry (upside ÷ downside) <output id="minasym-out" class="num">1.5x</output></label>
+          <input id="minasym" type="range" min="1" max="4" step="0.25" value="1.5">
+        </div>
+
+        <button class="btn primary" id="run">▶ Build portfolio</button>
+        <p class="sub" style="margin-top:10px;text-align:center" id="last-run-note"></p>
+      </div>
+    </aside>
+
+    <!-- ================= Main ================= -->
+    <main class="main">
+      <!-- Empty state -->
+      <section class="card hero" id="hero">
+        <div class="eyebrow">Microsoft × LSEG Hackathon · AI investment analyst</div>
+        <h1>Where should $100,000 go — and why?</h1>
+        <p>Skew screens the whole S&amp;P 500 on SEC-reported fundamentals, models a bear, base and bull case for every stock, has GPT read each finalist's latest earnings release and news, then builds a core-satellite portfolio and explains it. Every number is traceable to its source.</p>
+        <div class="how">
+          <div><span>02 · DATA</span><b>Screen 500 stocks</b>SEC 10-K fundamentals, analyst consensus, earnings record, insider trades.</div>
+          <div><span>03 · MODEL</span><b>Measure asymmetry</b>5-year bear / base / bull prices from EPS growth and valuation.</div>
+          <div><span>04 · AI</span><b>Read the filings</b>GPT reads each finalist's earnings release and news, citing every claim.</div>
+          <div><span>05 · ALLOCATE</span><b>Size positions</b>Index core plus top picks, with stock and sector caps.</div>
+          <div><span>06 · EXPLAIN</span><b>Client memo</b>Plain-English rationale, every figure checked against the data.</div>
+        </div>
+      </section>
+
+      <!-- Pipeline progress -->
+      <section class="card hidden" id="pipeline-card">
+        <div class="card-head">
+          <div><h2>Pipeline</h2><p class="sub" id="pipeline-sub">Running…</p></div>
+        </div>
+        <div class="pipeline" id="pipeline"></div>
+        <div class="funnel" id="funnel"></div>
+        <div class="err hidden" id="error" style="margin-top:12px"></div>
+      </section>
+
+      <!-- Results -->
+      <div id="results" class="hidden" style="display:flex;flex-direction:column;gap:20px">
+        <section class="kpis" id="kpis"></section>
+
+        <section class="card accent-top" id="alloc-card">
+          <div class="card-head">
+            <div><div class="eyebrow">05 · The recommendation</div><h2 style="margin-top:6px">Where the money goes</h2></div>
+            <span class="sub" id="alloc-note"></span>
+          </div>
+          <div class="alloc">
+            <div class="donut-wrap">
+              <canvas id="donut"></canvas>
+              <div class="donut-center"><div><b id="donut-total" class="num"></b><span>invested</span></div></div>
+            </div>
+            <div class="table-scroll">
+              <table>
+                <thead><tr><th>Holding</th><th>Sector</th><th class="r">Amount</th><th>Weight</th><th class="r">Shares</th><th class="r">Asymmetry</th><th class="r">Score</th></tr></thead>
+                <tbody id="holdings"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section class="card memo" id="memo-card">
+          <div class="card-head">
+            <div><div class="eyebrow">06 · Why</div><h2 style="margin-top:6px">Client memo</h2></div>
+            <span id="verify"></span>
+          </div>
+          <div id="memo"></div>
+        </section>
+
+        <section class="card">
+          <div class="card-head">
+            <div><div class="eyebrow">04 · What the AI found</div><h2 style="margin-top:6px">Finalists</h2>
+              <p class="sub">Click any stock for the full analysis, scenarios and sources.</p></div>
+          </div>
+          <div class="grid" id="cards"></div>
+        </section>
+
+        <section class="card" id="excluded-card">
+          <div class="card-head">
+            <div><h2>Screened out</h2><p class="sub">Highest-quality names that did not make the cut, and why.</p></div>
+          </div>
+          <div class="table-scroll">
+            <table>
+              <thead><tr><th>Stock</th><th>Sector</th><th class="r">Score</th><th class="r">Asymmetry</th><th>Reason</th></tr></thead>
+              <tbody id="excluded"></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+
+      <section class="card method">
+        <div class="card-head"><div><div class="eyebrow">Method</div><h2 style="margin-top:6px">How Skew decides</h2></div></div>
+        <ol>
+          <li><b>Universe.</b> All S&amp;P 500 members. Fundamentals come from each company's annual 10-K filings via SEC EDGAR (5 years, split-adjusted). Prices, analyst consensus, earnings history and insider/Congress activity come from the Stocks-Research daily snapshot; final prices are refreshed live from Nasdaq.</li>
+          <li><b>Quality score (0–100).</b> Four equal pillars: growth (3-yr revenue and EPS CAGR), quality (operating margin, FCF margin, margin trend), balance sheet (debt/equity) and valuation (PEG). Missing data scores zero.</li>
+          <li><b>Asymmetry.</b> 5-year bear/base/bull prices: EPS grows at <code>min(g/2, 8%)</code> / <code>min(g, 20%)</code> / <code>min(g, 35%)</code> a year, then re-rates to a P/E of <code>min(P/E, 15)</code> / <code>25</code> / <code>35</code>. Asymmetry = bull upside ÷ bear downside.</li>
+          <li><b>AI analyst.</b> For the shortlist, GPT reads numbered facts — the metrics, the latest 8-K earnings release, news and market data — and returns earnings takeaways, moat, bull/bear points and thesis breakers, each citing its facts. It may adjust conviction by ±10 points; it never produces the numbers.</li>
+          <li><b>Allocation.</b> Final score = quality score + AI adjustment + asymmetry bonus (up to 10). The index core gets its share; the top picks split the rest in proportion to score, capped per stock and per sector. Whole shares only.</li>
+          <li><b>Memo check.</b> Every number in the AI-written memo is matched against the facts it was given; anything unmatched is flagged.</li>
+        </ol>
+        <p class="sub" style="margin-top:12px">Limitations: past growth does not guarantee future growth; scenario multiples are simple rules, not forecasts; US-listed 10-K filers only.</p>
+      </section>
+    </main>
+  </div>
+
+  <footer>Skew · Microsoft × LSEG Hackathon 2026 · Educational project — not financial advice.</footer>
+
+  <div class="overlay" id="overlay"></div>
+  <aside class="drawer" id="drawer" aria-hidden="true">
+    <div class="drawer-head" id="drawer-head"></div>
+    <div class="drawer-body" id="drawer-body"></div>
+  </aside>
+  <div class="tip hidden" id="tip"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
