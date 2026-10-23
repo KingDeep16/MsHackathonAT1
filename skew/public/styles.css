@@ -8327,3 +8327,22 @@ section[id], div[id].target-scroll-section, .target-scroll-section {
 
 
 
+
+/* Skew fix: the docked storyline navigator overlapped the header and stock ribbon,
+   because only .tab-panel was padded. Reserve the gutter on the whole page instead. */
+@media (min-width: 1440px) {
+  body:not(.dual-pane-active) .dashboard-container {
+    padding-left: max(24px, calc(172px - max(0px, (100vw - 1600px) / 2)));
+  }
+  body:not(.dual-pane-active) .tab-panel {
+    padding-left: 0;
+  }
+}
+@media (min-width: 1150px) and (max-width: 1439px) {
+  body:not(.dual-pane-active) .dashboard-container {
+    padding-left: 56px;
+  }
+  body:not(.dual-pane-active) .tab-panel {
+    padding-left: 0;
+  }
+}
