@@ -20,7 +20,7 @@ const storage = {
   get(k) { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } },
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* storage full or blocked */ } },
 };
-const PALETTE = ["#0a84ff", "#30d158", "#8e8e93", "#64d2ff", "#bf5af2", "#ff9f0a", "#5e5ce6", "#66d4cf", "#ac8e68", "#636366", "#409cff", "#7d7aff", "#32ade6", "#a2845e", "#aeaeb2", "#34c759"];
+const PALETTE = ["#8b5cf6", "#06b6d4", "#10b981", "#f59e0b", "#3b82f6", "#ec4899", "#14b8a6", "#f97316", "#a3e635", "#e879f9", "#38bdf8", "#facc15", "#fb7185", "#4ade80", "#c084fc", "#2dd4bf"];
 
 async function api(path, body, timeoutMs = 200000) {
   const controller = new AbortController();
@@ -479,10 +479,10 @@ function drawFinancialCharts(d) {
   });
   const rev = d.financials.revenue.slice(-5), eps = d.financials.eps.slice(-5);
   state.charts.rev = new Chart($("rev-chart"), { type: "bar",
-    data: { labels: rev.map((r) => r[0].slice(0, 4)), datasets: [{ data: rev.map((r) => r[1]), backgroundColor: "#8e8e93", borderRadius: 4 }] },
+    data: { labels: rev.map((r) => r[0].slice(0, 4)), datasets: [{ data: rev.map((r) => r[1]), backgroundColor: "#06b6d4", borderRadius: 5 }] },
     options: opts("REVENUE (FY)", big) });
   state.charts.eps = new Chart($("eps-chart"), { type: "bar",
-    data: { labels: eps.map((r) => r[0].slice(0, 4)), datasets: [{ data: eps.map((r) => r[1]), backgroundColor: "#0a84ff", borderRadius: 4 }] },
+    data: { labels: eps.map((r) => r[0].slice(0, 4)), datasets: [{ data: eps.map((r) => r[1]), backgroundColor: "#8b5cf6", borderRadius: 5 }] },
     options: opts("DILUTED EPS (FY, split-adj.)", (v) => "$" + Number(v).toFixed(2)) });
 }
 
