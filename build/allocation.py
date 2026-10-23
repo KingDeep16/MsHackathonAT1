@@ -8,15 +8,76 @@ def asymmetry_bonus(ratio):
     return min(10.0, max(0.0, 2 * ratio)) if finite(ratio) else 0.0
 
 
-def final_score(analysis):
+def score_breakdown(analysis):
+    """Transparent final-score components for UI waterfalls and judge Q&A."""
+    pillars = dict(analysis.get("pillars") or {})
     adjustment = analysis.get("ai", {}).get("conviction_adjustment", {}).get("value", 0)
     if not isinstance(adjustment, int) or isinstance(adjustment, bool):
         adjustment = 0
     adjustment = max(-10, min(10, adjustment))
-    return (
-        analysis["quant_score"] + adjustment
-        + asymmetry_bonus(analysis["scenarios"].get("asymmetry_ratio"))
+    ratio = analysis.get("scenarios", {}).get("asymmetry_ratio")
+    bonus = asymmetry_bonus(ratio)
+    return {
+        "pillars": pillars,
+        "quant_score": analysis.get("quant_score", 0.0),
+        "ai_adjustment": adjustment,
+        "asymmetry_bonus": bonus,
+        "final_score": analysis.get("quant_score", 0.0) + adjustment + bonus,
+    }
+
+
+def final_score(analysis):
+    return score_breakdown(analysis)["final_score"]
+
+
+def portfolio_risk_profile(allocation):
+    """
+    Educational risk meter for the live demo — not a VaR model.
+    Higher score = more concentrated / aggressive satellite posture.
+    """
+    holdings = allocation.get("holdings") or []
+    stocks = [holding for holding in holdings if holding.get("kind") == "stock"]
+    amount = allocation.get("amount") or 1.0
+    cash_pct = (allocation.get("cash") or 0.0) / amount
+    core_pct = allocation.get("core_pct") or 0.0
+    sector_weights = {}
+    for holding in stocks:
+        sector = holding.get("sector") or "Unknown"
+        sector_weights[sector] = sector_weights.get(sector, 0.0) + holding.get("weight", 0.0)
+    max_sector = max(sector_weights.values()) if sector_weights else 0.0
+    max_stock = max((holding.get("weight", 0.0) for holding in stocks), default=0.0)
+    asymmetries = [
+        holding["asymmetry_ratio"] for holding in stocks
+        if finite(holding.get("asymmetry_ratio"))
+    ]
+    avg_asymmetry = sum(asymmetries) / len(asymmetries) if asymmetries else 0.0
+
+    # 0–100: more core/cash lowers risk; concentration and high asymmetry raise it.
+    aggression = (
+        35 * (1 - core_pct)
+        + 25 * min(1.0, max_sector / max(allocation.get("sector_cap") or 0.35, 1e-6))
+        + 20 * min(1.0, max_stock / max(allocation.get("stock_cap") or 0.15, 1e-6))
+        + 15 * min(1.0, avg_asymmetry / 5.0)
+        + 5 * (1 - min(1.0, cash_pct / 0.10))
     )
+    score = max(0.0, min(100.0, aggression))
+    if score < 35:
+        label, tone = "Conservative core tilt", "calm"
+    elif score < 60:
+        label, tone = "Balanced core–satellite", "steady"
+    else:
+        label, tone = "Conviction satellite tilt", "assertive"
+    return {
+        "score": score,
+        "label": label,
+        "tone": tone,
+        "core_pct": core_pct,
+        "cash_pct": cash_pct,
+        "max_sector_pct": max_sector,
+        "max_stock_pct": max_stock,
+        "avg_asymmetry": avg_asymmetry if asymmetries else None,
+        "funded_satellites": len(stocks),
+    }
 
 
 def constrained_targets(stocks, budget, stock_limit, sector_limit):
@@ -148,7 +209,7 @@ def allocate(analyses, amount, core_pct, etf, etf_price, n_stocks,
             if denominator else None
         )
 
-    return {
+    result = {
         "amount": amount, "core_pct": core_pct, "etf": etf,
         "holdings": holdings, "invested": invested, "cash": max(0.0, amount - invested),
         "weighted_asymmetry": weighted("asymmetry_ratio"),
@@ -156,3 +217,5 @@ def allocate(analyses, amount, core_pct, etf, etf_price, n_stocks,
         "screened": screened, "notes": notes,
         "stock_cap": stock_cap, "sector_cap": sector_cap, "requested_stocks": n_stocks,
     }
+    result["risk"] = portfolio_risk_profile(result)
+    return result

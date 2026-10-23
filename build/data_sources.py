@@ -421,3 +421,50 @@ def fetch_universe(tickers, etf, refresh=False, progress=None):
             if progress:
                 progress(completed, len(jobs), ticker)
     return records
+
+
+def fetch_macro():
+    """
+    Lightweight macro context for the dashboard (US 10Y yield via Yahoo).
+    Failure is non-fatal — the portfolio pipeline does not depend on it.
+    """
+    symbol = config.MACRO_SYMBOL
+    cached = get_cached("MACRO_TNX", False)
+    if cached and cached.get("fields", {}).get("yield"):
+        return cached
+    try:
+        ticker = yf.Ticker(symbol)
+        history = ticker.history(period="5d")
+        value = None
+        if history is not None and not history.empty:
+            value = numeric(history["Close"].iloc[-1])
+        info = getattr(ticker, "fast_info", None)
+        if value is None and info is not None:
+            value = numeric(getattr(info, "last_price", None) or getattr(info, "lastPrice", None))
+        record = {
+            "ticker": symbol,
+            "fetched_at": utc_now(),
+            "fields": {
+                "yield": tagged(
+                    value,
+                    f"https://finance.yahoo.com/quote/{symbol}",
+                    "yahoo",
+                    unit="percent",
+                    label="US 10-Year Treasury yield",
+                ),
+            },
+            "errors": [] if value is not None else ["10Y yield unavailable from Yahoo"],
+        }
+        try:
+            write_json(config.CACHE_DIR / "MACRO_TNX.json", record)
+        except OSError:
+            pass
+        return record
+    except Exception as error:
+        return {
+            "ticker": symbol,
+            "fetched_at": utc_now(),
+            "fields": {},
+            "errors": [short_error("Macro fetch", error)],
+        }
+

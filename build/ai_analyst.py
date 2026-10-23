@@ -1,3 +1,4 @@
+import hashlib
 import json
 import math
 import re
@@ -7,6 +8,7 @@ from openai import AzureOpenAI
 
 import config
 from scoring import finite
+from storage import read_json, write_json
 
 ANALYST_PROMPT = """
 You are a cautious investment research assistant for a fundamentals-driven
@@ -155,9 +157,41 @@ def unavailable(reason):
     }
 
 
-def analyze_one(ticker, facts):
+def facts_digest(facts):
+    payload = json.dumps(facts, sort_keys=True, allow_nan=False, separators=(",", ":"))
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()[:24]
+
+
+def ai_cache_path(ticker, digest):
+    return config.AI_CACHE_DIR / f"{ticker}_{digest}.json"
+
+
+def load_cached_ai(ticker, facts):
+    cached = read_json(ai_cache_path(ticker, facts_digest(facts)))
+    if not isinstance(cached, dict) or cached.get("status") != "available":
+        return None
+    try:
+        return validate_analysis(cached, facts)
+    except ValueError:
+        return None
+
+
+def save_cached_ai(ticker, facts, analysis):
+    if analysis.get("status") != "available":
+        return
+    try:
+        write_json(ai_cache_path(ticker, facts_digest(facts)), analysis)
+    except OSError:
+        pass
+
+
+def analyze_one(ticker, facts, refresh=False):
     if not config.OPENAI_API_KEY:
         return unavailable("OPENAI_API_KEY is not set")
+    if not refresh:
+        cached = load_cached_ai(ticker, facts)
+        if cached is not None:
+            return {**cached, "cached": True}
     messages = [
         {"role": "system", "content": ANALYST_PROMPT},
         {"role": "user", "content": json.dumps({"ticker": ticker, "FACTS": facts}, allow_nan=False)},
@@ -171,7 +205,9 @@ def analyze_one(ticker, facts):
                         response_format={"type": "json_object"},
                     )
                     text = response.choices[0].message.content or ""
-                    return validate_analysis(json.loads(text), facts)
+                    result = validate_analysis(json.loads(text), facts)
+                    save_cached_ai(ticker, facts, result)
+                    return {**result, "cached": False}
                 except Exception as error:
                     if attempt == 1:
                         return unavailable(type(error).__name__ + " after one retry")
@@ -188,7 +224,7 @@ def analyze_one(ticker, facts):
     return unavailable("no response")
 
 
-def analyze_top(analyses, records, progress=None):
+def analyze_top(analyses, records, progress=None, refresh=False):
     ordered = sorted(analyses, key=lambda item: (-item["quant_score"], item["ticker"]))
     for analysis in ordered:
         analysis["facts"] = build_facts(records[analysis["ticker"]], analysis)
@@ -196,7 +232,7 @@ def analyze_top(analyses, records, progress=None):
     shortlist = ordered[:config.AI_TOP_N]
     with ThreadPoolExecutor(max_workers=config.MAX_WORKERS) as executor:
         futures = {
-            executor.submit(analyze_one, item["ticker"], item["facts"]): item
+            executor.submit(analyze_one, item["ticker"], item["facts"], refresh): item
             for item in shortlist
         }
         for completed, future in enumerate(as_completed(futures), 1):

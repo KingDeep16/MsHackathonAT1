@@ -10,24 +10,146 @@ from plotly.subplots import make_subplots
 
 import config
 from ai_analyst import analyze_top, write_memo
-from allocation import allocate, final_score
-from data_sources import fetch_universe
+from allocation import allocate, final_score, score_breakdown
+from data_sources import fetch_macro, fetch_universe
 from scoring import analyze_record, annual_values, field
 from storage import read_json, write_json
 
-st.set_page_config(page_title="Skew · Invest with asymmetry", page_icon="◒", layout="wide")
+st.set_page_config(
+    page_title="Skew · AI Portfolio Analyst",
+    page_icon="◒",
+    layout="wide",
+    initial_sidebar_state="expanded",
+)
+
 st.markdown("""
 <style>
-.block-container {padding-top: 2rem; padding-bottom: 3rem; max-width: 1450px;}
-h1 {letter-spacing: -0.06em;}
-[data-testid="stMetricValue"] {font-size: 1.7rem;}
-[data-testid="stMetric"] {
-    background: rgba(120,140,160,.07);
-    padding: 1rem; border-radius: 12px;
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap');
+
+:root {
+  --ink: #0B1F1C;
+  --muted: #4A635E;
+  --paper: #F4F7F6;
+  --panel: #FFFFFF;
+  --line: #D5E0DC;
+  --accent: #0F766E;
+  --accent-soft: #CCFBF1;
+  --warn: #B45309;
+  --danger: #B91C1C;
+  --ok: #047857;
 }
-.stCaption {line-height: 1.5;}
+
+html, body, [class*="css"] {
+  font-family: "IBM Plex Sans", sans-serif;
+  color: var(--ink);
+}
+.block-container {
+  padding-top: 1.4rem;
+  padding-bottom: 2.5rem;
+  max-width: 1480px;
+}
+h1, h2, h3, .skew-brand {
+  font-family: "Sora", sans-serif;
+  letter-spacing: -0.04em;
+}
+[data-testid="stMetricValue"] {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 1.55rem;
+}
+[data-testid="stMetric"] {
+  background: linear-gradient(160deg, #ffffff 0%, #eef5f3 100%);
+  border: 1px solid var(--line);
+  padding: 0.95rem 1rem;
+  border-radius: 14px;
+}
+.skew-hero {
+  background:
+    radial-gradient(1200px 420px at 8% -10%, #99f6e4 0%, transparent 55%),
+    linear-gradient(135deg, #0B1F1C 0%, #134E4A 55%, #0F766E 100%);
+  color: #F0FDFA;
+  border-radius: 22px;
+  padding: 1.55rem 1.75rem 1.4rem;
+  margin-bottom: 1.1rem;
+  box-shadow: 0 18px 40px rgba(11, 31, 28, 0.18);
+}
+.skew-hero h1 {
+  margin: 0;
+  font-size: clamp(2rem, 3.2vw, 2.7rem);
+  color: #F0FDFA !important;
+}
+.skew-hero .tagline {
+  margin: 0.35rem 0 0.85rem;
+  font-size: 1.08rem;
+  opacity: 0.92;
+}
+.skew-hero .mandate {
+  max-width: 58rem;
+  opacity: 0.88;
+  line-height: 1.45;
+  font-size: 0.98rem;
+}
+.skew-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-top: 0.95rem;
+}
+.skew-pill {
+  background: rgba(240, 253, 250, 0.14);
+  border: 1px solid rgba(240, 253, 250, 0.28);
+  color: #ECFDF5;
+  border-radius: 999px;
+  padding: 0.28rem 0.75rem;
+  font-size: 0.82rem;
+  font-weight: 500;
+}
+.client-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 1rem 1.1rem;
+  height: 100%;
+}
+.client-card h4 {
+  margin: 0 0 0.35rem;
+  font-family: "Sora", sans-serif;
+  font-size: 0.95rem;
+}
+.client-card p, .client-card li {
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.45;
+  margin: 0;
+}
+.risk-shell {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 1rem 1.15rem 1.15rem;
+  margin: 0.4rem 0 1rem;
+}
+.risk-track {
+  height: 12px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #047857 0%, #CA8A04 50%, #B91C1C 100%);
+  position: relative;
+  margin-top: 0.65rem;
+}
+.risk-knob {
+  position: absolute;
+  top: 50%;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  border: 3px solid var(--ink);
+  transform: translate(-50%, -50%);
+  box-shadow: 0 2px 8px rgba(0,0,0,.25);
+}
+.stCaption { line-height: 1.5; color: var(--muted); }
 @media (max-width: 640px) {
-    .block-container {padding-left: 1rem; padding-right: 1rem;}
+  .block-container { padding-left: 0.9rem; padding-right: 0.9rem; }
+  .skew-hero { padding: 1.2rem; }
 }
 </style>
 """, unsafe_allow_html=True)
@@ -70,20 +192,23 @@ def run_pipeline(settings, refresh, progress):
     records = fetch_universe(
         settings["tickers"], settings["etf"], refresh=refresh,
         progress=lambda done, total, ticker: progress.progress(
-            0.05 + 0.50 * done / total, text=f"Public data · {ticker} · {done}/{total}"
+            0.05 + 0.48 * done / total, text=f"Public data · {ticker} · {done}/{total}"
         ),
     )
+    progress.progress(0.54, text="Macro context · US 10Y yield")
+    macro = fetch_macro()
     analyses = [analyze_record(records[ticker]) for ticker in settings["tickers"]]
-    progress.progress(0.56, text="Quantitative scores and five-year scenarios")
+    progress.progress(0.58, text="Quantitative scores and five-year scenarios")
     analyses = analyze_top(
-        analyses, records,
+        analyses, records, refresh=refresh,
         progress=lambda done, total, ticker: progress.progress(
-            0.56 + 0.31 * done / total, text=f"AI analyst · {ticker} · {done}/{total}"
+            0.58 + 0.28 * done / total, text=f"AI analyst · {ticker} · {done}/{total}"
         ),
     )
     for analysis in analyses:
         analysis["final_score"] = final_score(analysis)
-    progress.progress(0.89, text="Applying stock and sector caps")
+        analysis["score_parts"] = score_breakdown(analysis)
+    progress.progress(0.88, text="Applying stock and sector caps")
     allocation = allocate(
         analyses, settings["amount"], settings["core_pct"], settings["etf"],
         field(records[settings["etf"]], "price"), settings["n_stocks"],
@@ -95,17 +220,70 @@ def run_pipeline(settings, refresh, progress):
         "schema_version": config.RUN_SCHEMA_VERSION,
         "created_at": datetime.now(timezone.utc).isoformat(),
         "settings": settings, "records": records, "analyses": analyses,
-        "allocation": allocation, "memo": memo,
+        "allocation": allocation, "memo": memo, "macro": macro,
+        "client": {
+            "name": config.CLIENT_NAME,
+            "archetype": config.CLIENT_ARCHETYPE,
+            "mandate": config.CLIENT_MANDATE,
+            "constraints": config.CLIENT_CONSTRAINTS,
+        },
     }
+
+
+def risk_meter_html(risk):
+    score = risk.get("score", 0)
+    return f"""
+    <div class="risk-shell">
+      <div style="display:flex;justify-content:space-between;gap:1rem;align-items:baseline;">
+        <div>
+          <div style="font-family:Sora,sans-serif;font-weight:600;">Portfolio posture</div>
+          <div style="color:#4A635E;font-size:0.92rem;">{risk.get("label", "—")}</div>
+        </div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:1.35rem;font-weight:500;">
+          {score:.0f}<span style="font-size:0.85rem;color:#4A635E;"> / 100</span>
+        </div>
+      </div>
+      <div class="risk-track"><div class="risk-knob" style="left:{score:.1f}%;"></div></div>
+      <div style="display:flex;justify-content:space-between;margin-top:0.35rem;color:#4A635E;font-size:0.78rem;">
+        <span>Core-heavy</span><span>Balanced</span><span>Satellite-heavy</span>
+      </div>
+    </div>
+    """
+
+
+def score_waterfall(parts):
+    labels = list(parts["pillars"].keys()) + ["AI overlay", "Asymmetry bonus"]
+    values = list(parts["pillars"].values()) + [parts["ai_adjustment"], parts["asymmetry_bonus"]]
+    figure = go.Figure(go.Waterfall(
+        orientation="v",
+        measure=["relative"] * len(labels) + ["total"],
+        x=labels + ["Final"],
+        y=values + [parts["final_score"]],
+        text=[f"{value:+.1f}" for value in values] + [f"{parts['final_score']:.1f}"],
+        textposition="outside",
+        connector={"line": {"color": "#94A3B8"}},
+        increasing={"marker": {"color": "#0F766E"}},
+        decreasing={"marker": {"color": "#B91C1C"}},
+        totals={"marker": {"color": "#134E4A"}},
+    ))
+    figure.update_layout(
+        height=320, margin=dict(l=10, r=10, t=30, b=10),
+        yaxis_title="Points", showlegend=False,
+        title=dict(text="Final score build-up", font=dict(size=14)),
+    )
+    return figure
 
 
 if "last_run" not in st.session_state:
     saved = read_json(config.LAST_RUN_PATH)
     if (
         isinstance(saved, dict)
-        and saved.get("schema_version") == config.RUN_SCHEMA_VERSION
+        and saved.get("schema_version") in (1, config.RUN_SCHEMA_VERSION)
         and all(key in saved for key in ("settings", "records", "analyses", "allocation", "memo"))
     ):
+        if "risk" not in saved["allocation"]:
+            from allocation import portfolio_risk_profile
+            saved["allocation"]["risk"] = portfolio_risk_profile(saved["allocation"])
         st.session_state.last_run = saved
     else:
         st.session_state.last_run = None
@@ -114,9 +292,9 @@ last = st.session_state.last_run
 previous = last["settings"] if last else {}
 
 with st.sidebar:
-    st.title("◒ Skew")
-    st.caption("The patient, asymmetric investor")
-    st.markdown("**5+ years · Fundamentals first · Core–satellite**")
+    st.markdown("### ◒ Skew")
+    st.caption("AI analyst for asymmetric, long-horizon portfolios")
+    st.markdown(f"**Client:** {config.CLIENT_NAME}")
     amount = st.number_input(
         "Portfolio amount (US$)", min_value=1000.0, max_value=100_000_000.0,
         value=float(previous.get("amount", config.DEFAULT_AMOUNT)), step=1000.0,
@@ -140,14 +318,15 @@ with st.sidebar:
         "Stock universe", ", ".join(previous.get("tickers", config.DEFAULT_UNIVERSE)), height=165
     )
     run_clicked = st.button("Run analysis", type="primary", use_container_width=True)
-    refresh_clicked = st.button("Refresh data", use_container_width=True)
-    st.caption("Run uses data younger than 24h. Refresh bypasses the ticker cache.")
+    refresh_clicked = st.button("Refresh data + AI", use_container_width=True)
+    st.caption("Run reuses ticker and AI caches (under 24h). Refresh bypasses both.")
     if not config.SEC_USER_AGENT:
-        st.error("SEC_USER_AGENT is missing. Set your name and email before fetching SEC data.")
+        st.error("SEC_USER_AGENT is missing. Copy `.env.example` → `.env` and set your name + email.")
     if not config.OPENAI_API_KEY:
         st.warning("No OPENAI_API_KEY: quantitative mode; AI and memo unavailable.")
     st.caption(f"Model: {config.LLM_MODEL}")
     if last:
+        st.success("Saved run loaded — demo-ready offline view.")
         st.caption(f"Last completed run: {last['created_at'][:19]} UTC")
         timestamps = [
             record["fetched_at"] for record in last["records"].values()
@@ -156,9 +335,42 @@ with st.sidebar:
         if timestamps:
             st.caption(f"Oldest data fetch: {min(timestamps)[:19]} UTC")
 
-st.title("Skew")
-st.markdown("### Own the upside. Understand the downside.")
-st.caption("A source-linked investment research demo for one patient, fundamentals-driven client.")
+st.markdown(f"""
+<div class="skew-hero">
+  <div style="opacity:.75;font-size:.82rem;letter-spacing:.08em;text-transform:uppercase;">
+    Microsoft × LSEG · Build the AI Analyst
+  </div>
+  <h1>Skew</h1>
+  <div class="tagline">Own the upside. Understand the downside.</div>
+  <div class="mandate"><strong>{config.CLIENT_NAME}</strong> — {config.CLIENT_MANDATE}</div>
+  <div class="skew-pills">
+    {''.join(f'<span class="skew-pill">{item}</span>' for item in config.CLIENT_CONSTRAINTS)}
+  </div>
+</div>
+""", unsafe_allow_html=True)
+
+info_cols = st.columns(3)
+with info_cols[0]:
+    st.markdown(f"""
+    <div class="client-card">
+      <h4>1 · The Client</h4>
+      <p>{config.CLIENT_ARCHETYPE}. Patient capital, asymmetric payoff preference, index core for ballast.</p>
+    </div>
+    """, unsafe_allow_html=True)
+with info_cols[1]:
+    st.markdown("""
+    <div class="client-card">
+      <h4>2 · The Data</h4>
+      <p>Yahoo quotes &amp; news, SEC EDGAR US-GAAP facts + 8-K exhibits, optional Finnhub headlines, 10Y yield context.</p>
+    </div>
+    """, unsafe_allow_html=True)
+with info_cols[2]:
+    st.markdown("""
+    <div class="client-card">
+      <h4>3 · The AI Logic</h4>
+      <p>Cited Azure OpenAI research on the top quant names, conviction overlay, memo with numeric occurrence check.</p>
+    </div>
+    """, unsafe_allow_html=True)
 
 if run_clicked or refresh_clicked:
     progress = st.progress(0.0, text="Preparing analysis")
@@ -231,22 +443,40 @@ def render_facts(facts):
 
 with recommendation:
     if not last:
-        st.info("Set SEC_USER_AGENT, then choose Run analysis. A completed run reloads instantly without network.")
+        st.info(
+            "Set `SEC_USER_AGENT` in `.env`, then choose **Run analysis**. "
+            "A completed run reloads instantly without network — ideal for the live pitch."
+        )
     else:
         allocation = last["allocation"]
+        risk = allocation.get("risk") or {}
+        macro = last.get("macro") or {}
+        treasury = ((macro.get("fields") or {}).get("yield") or {}).get("value")
+
         st.caption(
             f"Saved recommendation · {last['created_at'][:19]} UTC · "
             f"{money(allocation['amount'])} portfolio. Sidebar edits apply only after a new run."
         )
-        columns = st.columns(4)
+        columns = st.columns(5)
         columns[0].metric("Total invested", money(allocation["invested"]))
         columns[1].metric("Funded holdings", len(allocation["holdings"]))
         columns[2].metric("Weighted asymmetry", multiple(allocation["weighted_asymmetry"], cap=True))
         columns[3].metric("Weighted EPS CAGR", percent(allocation["weighted_eps_cagr"]))
+        columns[4].metric("US 10Y yield", f"{treasury:.2f}%" if treasury is not None else "—")
         st.caption(
             "Weighted KPIs cover funded satellites only and exclude the ETF/cash. "
-            "Asymmetry uses uncapped ratios in calculations; display stops at 10×+."
+            "Asymmetry uses uncapped ratios in calculations; display stops at 10×+. "
+            "10Y yield is macro context only — not an allocation input."
         )
+
+        if risk:
+            st.markdown(risk_meter_html(risk), unsafe_allow_html=True)
+            risk_cols = st.columns(4)
+            risk_cols[0].metric("Index core target", percent(risk.get("core_pct")))
+            risk_cols[1].metric("Cash residual", percent(risk.get("cash_pct")))
+            risk_cols[2].metric("Largest sector weight", percent(risk.get("max_sector_pct")))
+            risk_cols[3].metric("Avg satellite asymmetry", multiple(risk.get("avg_asymmetry"), cap=True))
+
         st.markdown(f"**Leftover cash: {money(allocation['cash'])}**")
         for note in allocation["notes"]:
             st.info(note)
@@ -261,7 +491,10 @@ with recommendation:
                     pd.DataFrame(slices), names="Holding", values="USD", hole=0.66,
                     color_discrete_sequence=px.colors.qualitative.Safe,
                 )
-                figure.update_layout(margin=dict(l=5, r=5, t=20, b=10), height=350)
+                figure.update_layout(
+                    margin=dict(l=5, r=5, t=20, b=10), height=350,
+                    paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+                )
                 figure.update_traces(textinfo="label+percent")
                 st.plotly_chart(figure, use_container_width=True)
             with right:
@@ -286,9 +519,9 @@ with recommendation:
         if memo.get("text"):
             st.write(memo["text"])
             check = memo["verification"]
-            if check["verified"] and check["checked_count"]:
+            if check and check["verified"] and check["checked_count"]:
                 st.success("All figures verified against source data")
-            elif check["unverified"]:
+            elif check and check["unverified"]:
                 st.warning("Unverified numbers: " + ", ".join(check["unverified"]))
             else:
                 st.info("The memo contains no numeric figures to verify.")
@@ -330,11 +563,13 @@ with deep_dive:
             analysis = next(item for item in last["analyses"] if item["ticker"] == ticker)
             metrics = analysis["metrics"]
             scenario = analysis["scenarios"]
+            parts = analysis.get("score_parts") or score_breakdown(analysis)
             columns = st.columns(4)
             columns[0].metric("Asymmetry", multiple(scenario["asymmetry_ratio"], cap=True))
             columns[1].metric("Quant score", f"{analysis['quant_score']:.1f} / 100")
             columns[2].metric("Final score", f"{analysis['final_score']:.1f}")
             columns[3].metric("Data confidence", percent(analysis["confidence"]))
+            st.plotly_chart(score_waterfall(parts), use_container_width=True)
             columns = st.columns(4)
             columns[0].metric("Revenue · 3y CAGR", percent(metrics["revenue_cagr"]))
             columns[1].metric("EPS · 3y CAGR", percent(metrics["eps_cagr"]))
@@ -359,6 +594,7 @@ with deep_dive:
                         for key in ("sector", "market_cap", "trailing_pe", "forward_pe", "high_52w", "low_52w")
                     },
                     "pillars_out_of_25": analysis["pillars"],
+                    "score_parts": parts,
                 }, expanded=False)
 
             revenue = annual_values(record, "revenue")
@@ -368,13 +604,13 @@ with deep_dive:
                 chart.add_trace(
                     go.Bar(x=[str(year) for year in sorted(revenue)],
                            y=[revenue[year] / 1e9 for year in sorted(revenue)],
-                           name="Revenue", marker_color="#3478c0"),
+                           name="Revenue", marker_color="#0F766E"),
                     row=1, col=1,
                 )
                 chart.add_trace(
                     go.Bar(x=[str(year) for year in sorted(eps)],
                            y=[eps[year] for year in sorted(eps)],
-                           name="EPS", marker_color="#20a387"),
+                           name="EPS", marker_color="#0EA5E9"),
                     row=1, col=2,
                 )
                 chart.update_layout(height=330, showlegend=False, margin=dict(t=40, b=25))
@@ -388,7 +624,7 @@ with deep_dive:
                 chart = go.Figure(go.Bar(
                     x=["Bear", "Base", "Bull"],
                     y=[scenario[key] for key in ("bear", "base", "bull")],
-                    marker_color=["#d56b61", "#547fa5", "#20a387"],
+                    marker_color=["#B91C1C", "#0F766E", "#0EA5E9"],
                     text=[money(scenario[key]) for key in ("bear", "base", "bull")],
                     textposition="auto",
                 ))
@@ -413,10 +649,12 @@ with deep_dive:
             if ai["status"] != "available":
                 st.info(ai["message"])
             else:
+                cached_note = " · cached" if ai.get("cached") else ""
                 st.caption(
                     f"Sentiment: {ai['sentiment']['score']:+.2f} · "
                     f"Moat: {ai['moat']['rating']} · "
                     f"Conviction overlay: {ai['conviction_adjustment']['value']:+d}"
+                    f"{cached_note}"
                 )
                 for label, key in [
                     ("Latest earnings", "earnings_takeaways"),
@@ -469,6 +707,7 @@ with method:
 ### Five steps
 1. **Gather public evidence.** Fetch Yahoo quotes, SEC annual facts and the latest
    earnings 8-K exhibit, plus recent headlines. Cache each ticker for 24 hours.
+   AI analyses are cached by facts digest until **Refresh data + AI**.
 2. **Measure fundamentals.** Calculate growth, margins, leverage and PEG, then four
    equally weighted quantitative pillars. Missing components score zero.
 3. **Model the skew.** Compound annual diluted EPS for five years and apply
@@ -543,9 +782,14 @@ sector look-through. Whole-share rounding leaves cash and cannot breach a cap.
 If constraints cannot fund the requested stock count or budget, cash remains;
 the rules are never silently relaxed. This is a proposed snapshot, not an order.
 
+### Portfolio posture meter
+An educational 0–100 composite of core weight, residual cash, max sector/stock
+weights and average satellite asymmetry. It is a presentation aid for judge Q&A,
+not Value-at-Risk or a calibrated risk model.
+
 ### Data and traceability
 - [Yahoo Finance](https://finance.yahoo.com/) via yfinance: price, sector,
-  market cap, P/E, 52-week range and fallback news.
+  market cap, P/E, 52-week range, fallback news, and US 10Y yield (`^TNX`).
 - [SEC EDGAR](https://www.sec.gov/edgar/search/): ticker mapping,
   US-GAAP company facts, submissions and earnings-release exhibits.
 - [Finnhub](https://finnhub.io/docs/api/company-news): headlines when a key is set.
@@ -583,4 +827,4 @@ connection. A saved run reloads without network but is an explicitly dated snaps
 """)
 
 st.divider()
-st.caption("Educational project, not financial advice.")
+st.caption("Educational hackathon project. Not financial advice.")
